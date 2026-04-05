@@ -70,7 +70,7 @@ Este documento describe la arquitectura técnica completa, la estructura de carp
 2. Axios adjunta el JWT en cada request como `Bearer`.  
 3. TanStack Query cachea y sincroniza los datos del servidor.  
 4. Zustand mantiene el estado de UI efímero (sidebars, modales, selecciones).  
-5. Las Edge Functions de Supabase orquestan el envío de recordatorios por WhatsApp 24 h antes de cada cita.
+5. Las Edge Functions de Supabase orquestan el envío de recordatorios por WhatsApp 24 h antes de cada cita, utilizando **Twilio** como proveedor de mensajería.
 
 ---
 
@@ -239,7 +239,8 @@ src/
 ### 6.5 Recordatorios (`features/appointments`)
 - Al crear/modificar una cita, se registra en `appointments`.  
 - Una **Supabase Edge Function** (`send-reminders`) se ejecuta via `pg_cron` (o cron job externo) cada hora y busca citas en las próximas 24 h donde `reminder_sent = false`.  
-- La función llama a la API de WhatsApp (Meta Cloud API) con el número de teléfono del cliente y actualiza `reminder_sent = true`.  
+- La función llama a la **Twilio Sandbox API para WhatsApp** con el número de teléfono del cliente y actualiza `reminder_sent = true`.  
+- Una segunda **Supabase Edge Function** (`whatsapp-webhook`) actúa como Webhook para recibir las respuestas de los clientes enviadas por WhatsApp; parsea el cuerpo del mensaje y actualiza automáticamente la columna `status` de la tabla `appointments` a `confirmed` o `cancelled` según la respuesta del cliente.  
 - `date-fns` se usa en el frontend para mostrar fechas formateadas y calcular countdowns.
 
 ---
