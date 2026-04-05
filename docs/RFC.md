@@ -31,6 +31,9 @@ Este documento describe la arquitectura técnica completa, la estructura de carp
 | Fechas | date-fns |
 | Backend / Auth | Supabase (PostgreSQL + Auth + Storage + Edge Functions) |
 | Firmas | react-signature-canvas |
+| PWA | vite-plugin-pwa |
+| Drag & Drop | @dnd-kit/core |
+| Exportación PDF | html2pdf.js |
 
 > **Regla:** Ningún subagente o pull-request puede introducir dependencias fuera de esta lista sin aprobación explícita del Arquitecto Senior.
 
@@ -367,9 +370,9 @@ CREATE POLICY "Own clients only" ON clients
 - [ ] Edge Function de recordatorios WhatsApp
 
 ### Fase 3 — Pulido y PWA
-- [ ] PWA (offline, instalar en pantalla de inicio)
-- [ ] Form Builder con drag-and-drop
-- [ ] Reportes y exportación PDF de fichas
+- [x] PWA (offline, instalar en pantalla de inicio)
+- [/] Form Builder con drag-and-drop (@dnd-kit)
+- [/] Reportes y exportación PDF de fichas (html2pdf.js)
 - [ ] Tests unitarios (Vitest) e integración (Playwright)
 
 ---
