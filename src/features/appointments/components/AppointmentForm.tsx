@@ -117,7 +117,7 @@ export const AppointmentForm = ({
                       <SelectItem key={s.id} value={s.name}>
                         <div className="flex flex-col">
                           <span className="font-semibold">{s.name}</span>
-                          {s.price && <span className="text-[10px] text-muted-foreground">{s.price}€</span>}
+                          {s.price && <span className="text-[10px] text-muted-foreground">${s.price}</span>}
                         </div>
                       </SelectItem>
                     ))
