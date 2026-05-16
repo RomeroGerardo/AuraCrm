@@ -371,7 +371,7 @@ CREATE POLICY "Own clients only" ON clients
 
 ### Fase 3 — Pulido y PWA
 - [x] PWA (offline, instalar en pantalla de inicio)
-- [/] Form Builder con drag-and-drop (@dnd-kit)
+- [x] Form Builder con drag-and-drop (@dnd-kit)
 - [/] Reportes y exportación PDF de fichas (html2pdf.js)
 - [ ] Tests unitarios (Vitest) e integración (Playwright)
 

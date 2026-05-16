@@ -1,0 +1,29 @@
+name: Security Review (AI)
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+jobs:
+  security-review:
+    name: AI Security Review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necesario para evaluar las diferencias en el PR
+
+      - name: Run Claude Security Review
+        uses: anthropic/claude-code-security-review@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: 'claude-3-5-sonnet-20240620'
+          prompt_override: 'You are a DevSecOps expert. Review the pull request for security vulnerabilities, OWASP top 10 issues, and secure coding best practices. Focus on the modified lines.'
