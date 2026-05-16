@@ -20,10 +20,17 @@ jobs:
         with:
           fetch-depth: 0 # Necesario para evaluar las diferencias en el PR
 
-      - name: Run Claude Security Review
-        uses: anthropic/claude-code-security-review@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          model: 'claude-3-5-sonnet-20240620'
-          prompt_override: 'You are a DevSecOps expert. Review the pull request for security vulnerabilities, OWASP top 10 issues, and secure coding best practices. Focus on the modified lines.'
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Claude Security Review
+        run: node scripts/claude-review.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
