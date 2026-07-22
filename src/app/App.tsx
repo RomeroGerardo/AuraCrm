@@ -14,6 +14,7 @@ const FormsPage = lazy(() => import('@/features/forms/pages/FormsPage').then(m =
 const FormFillerPage = lazy(() => import('@/features/forms/pages/FormFillerPage').then(m => ({ default: m.FormFillerPage })))
 const AppointmentsPage = lazy(() => import('@/features/appointments/pages/AppointmentsPage').then(m => ({ default: m.AppointmentsPage })))
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
+const LandingPage = lazy(() => import('@/features/landing/pages/LandingPage').then(m => ({ default: m.LandingPage })))
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
       <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Cargando...</div>}>
         <Routes>
           {/* Rutas Públicas */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
@@ -35,12 +37,12 @@ function App() {
             <Route path="/clients/:id/forms/:templateId" element={<FormFillerPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             
-            {/* Redirección dentro del Layout si se accede a la raíz autenticado */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            {/* Redirección dentro del Layout si se accede a una ruta inexistente autenticado */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
 
           {/* Fallback general */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
       <Toaster position="top-right" richColors closeButton />

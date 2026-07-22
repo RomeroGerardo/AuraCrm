@@ -21,14 +21,14 @@ const registerSchema = z.object({
 
 type RegisterFormValues = z.infer<typeof registerSchema>
 
-export const RegisterForm = () => {
+export const RegisterForm = ({ defaultPlan = 'starter' }: { defaultPlan?: string }) => {
   const { register: registerAuth, isSubmitting } = useAuth()
   const { register: registerForm, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema)
   })
 
   const onSubmit = (data: RegisterFormValues) => {
-    registerAuth(data.email, data.password, data.full_name, data.salon_name)
+    registerAuth(data.email, data.password, data.full_name, data.salon_name, defaultPlan)
   }
 
   return (

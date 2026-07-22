@@ -23,7 +23,7 @@ export const useAuth = () => {
     }
   }
 
-  const register = async (email: string, password: string, full_name: string, salon_name: string) => {
+  const register = async (email: string, password: string, full_name: string, salon_name: string, plan: string = 'starter') => {
     setIsSubmitting(true)
     try {
       // Registrar en Auth
@@ -31,7 +31,7 @@ export const useAuth = () => {
         email, 
         password,
         options: {
-          data: { full_name, salon_name }
+          data: { full_name, salon_name, plan }
         }
       })
       if (authError) throw authError
