@@ -14,7 +14,6 @@ import {
   Menu, 
   X,
   Settings,
-  LogOut,
   Bell
 } from 'lucide-react';
 
