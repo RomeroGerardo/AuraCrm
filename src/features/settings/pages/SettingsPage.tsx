@@ -12,7 +12,8 @@ import {
   Store, 
   Briefcase, 
   Loader2,
-  Pencil
+  Pencil,
+  CreditCard
 } from 'lucide-react';
 import { 
   Dialog, 
@@ -24,7 +25,7 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import type { BusinessService } from '../types/settings.types';
-
+import { BillingTab } from '../components/BillingTab';
 export const SettingsPage = () => {
   const { data: profile, isLoading } = useSettings();
   const updateProfile = useUpdateProfile();
@@ -108,6 +109,9 @@ export const SettingsPage = () => {
           </TabsTrigger>
           <TabsTrigger value="services" className="gap-2">
             <Briefcase className="h-4 w-4" /> Servicios
+          </TabsTrigger>
+          <TabsTrigger value="billing" className="gap-2">
+            <CreditCard className="h-4 w-4" /> Facturación y Planes
           </TabsTrigger>
         </TabsList>
 
@@ -309,6 +313,10 @@ export const SettingsPage = () => {
               ))
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="billing" className="animate-in fade-in-50 duration-500">
+          <BillingTab />
         </TabsContent>
       </Tabs>
     </div>

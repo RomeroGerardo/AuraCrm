@@ -5,6 +5,8 @@ import { useClient } from '@/features/clients/hooks/useClients';
 import { FormRenderer } from '../components/FormRenderer';
 import { SignaturePad } from '@/features/signatures/components/SignaturePad';
 import { useSignature } from '@/features/signatures/hooks/useSignature';
+import { useSubscription, checkAccess } from '@/hooks/useSubscription';
+import { Lock } from 'lucide-react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { generateDynamicSchema } from '../schemas/formSchema';
@@ -23,6 +25,8 @@ export const FormFillerPage: React.FC = () => {
   const { data: allTemplates = [], isLoading: loadingAll } = useTemplates();
   const { mutateAsync: submitForm, isPending: isSubmitting } = useSubmitForm();
   const { uploadSignature, isUploading } = useSignature();
+  const { planType, status, trialEnd } = useSubscription();
+  const hasSignatureAccess = checkAccess('signatures', planType, status, trialEnd);
   const { data: businessProfile } = useSettings();
 
   const fields = React.useMemo(() => template?.fields || [], [template]);
@@ -185,16 +189,30 @@ export const FormFillerPage: React.FC = () => {
         />
 
         <div id="signature-section" className="mt-8 space-y-4">
-          <SignaturePad 
-            onConfirm={(base64) => {
-              setValue('signature_url', base64);
-              if (base64) toast.success("Firma capturada correctamente");
-            }} 
-          />
-          
-          <p className="text-xs text-muted-foreground text-center px-4">
-            Al confirmar esta ficha, el cliente otorga su consentimiento legal mediante la firma digital adjunta.
-          </p>
+          {hasSignatureAccess ? (
+            <>
+              <SignaturePad 
+                onConfirm={(base64) => {
+                  setValue('signature_url', base64);
+                  if (base64) toast.success("Firma capturada correctamente");
+                }} 
+              />
+              <p className="text-xs text-muted-foreground text-center px-4">
+                Al confirmar esta ficha, el cliente otorga su consentimiento legal mediante la firma digital adjunta.
+              </p>
+            </>
+          ) : (
+            <div className="bg-slate-50 border rounded-xl p-6 text-center space-y-3">
+              <div className="mx-auto w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                <Lock className="w-5 h-5 text-amber-600" />
+              </div>
+              <p className="text-sm font-medium">Firmas Digitales Bloqueadas</p>
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                El módulo de firmas digitales está disponible a partir del <strong className="text-foreground">Plan Pro</strong>. 
+                Mejora tu plan desde la Configuración para habilitarlo.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="mt-12 mb-20 flex flex-col gap-3">
