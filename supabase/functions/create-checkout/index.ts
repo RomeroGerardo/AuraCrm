@@ -44,6 +44,9 @@ serve(async (req) => {
     const MP_ACCESS_TOKEN = Deno.env.get('MERCADOPAGO_ACCESS_TOKEN')
     if (!MP_ACCESS_TOKEN) throw new Error('MP_ACCESS_TOKEN not found')
 
+    const isTestMode = MP_ACCESS_TOKEN.startsWith('TEST-')
+    const payerEmail = isTestMode ? `test_user_${user.id.replace(/-/g, '').slice(0, 8)}@testuser.com` : user.email
+
     // Create a Preapproval (Subscription) in MercadoPago
     const mpResponse = await fetch('https://api.mercadopago.com/preapproval', {
       method: 'POST',
@@ -54,7 +57,7 @@ serve(async (req) => {
       body: JSON.stringify({
         reason: planName,
         external_reference: user.id,
-        payer_email: user.email,
+        payer_email: payerEmail,
         auto_recurring: {
           frequency: 1,
           frequency_type: "months",
