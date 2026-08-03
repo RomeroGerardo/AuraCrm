@@ -3,15 +3,29 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 serve(async (req) => {
   try {
-    const body = await req.json()
-    console.log("Webhook received:", body)
+    const url = new URL(req.url)
+    let body: any = {}
+    try {
+      body = await req.json()
+    } catch (_) {}
 
-    // MercadoPago can send 'type' or 'topic' depending on the configuration
-    const topic = body.type || body.topic
-    
-    if (topic === 'subscription_preapproval' || topic === 'preapproval') {
-      const subscriptionId = body.data?.id
-      if (!subscriptionId) throw new Error('No subscription ID in webhook')
+    console.log("Webhook SearchParams:", url.search)
+    console.log("Webhook body:", JSON.stringify(body))
+
+    // MercadoPago can send data in query params (IPN) or in body (Webhooks)
+    const topic = body.type || body.topic || body.action || url.searchParams.get('topic') || url.searchParams.get('type')
+    const subscriptionId = body.data?.id || url.searchParams.get('data.id') || url.searchParams.get('id')
+
+    if (
+      topic === 'subscription_preapproval' || 
+      topic === 'preapproval' || 
+      topic === 'subscription_authorized_payment' ||
+      (typeof topic === 'string' && (topic.includes('subscription') || topic.includes('preapproval')))
+    ) {
+      if (!subscriptionId) {
+        console.log('No subscription ID in webhook payload')
+        return new Response(JSON.stringify({ received: true, note: 'no id' }), { status: 200 })
+      }
 
       const MP_ACCESS_TOKEN = Deno.env.get('MERCADOPAGO_ACCESS_TOKEN')
       
@@ -23,37 +37,42 @@ serve(async (req) => {
       })
       
       if (!mpResponse.ok) {
-        throw new Error('Failed to fetch subscription details from MP')
+        console.error('Failed to fetch subscription details from MP:', await mpResponse.text())
+        return new Response(JSON.stringify({ received: true }), { status: 200 })
       }
 
       const subscription = await mpResponse.json()
-      console.log("Subscription details:", subscription)
+      console.log("Subscription details:", JSON.stringify(subscription))
 
       // external_reference holds our Supabase user.id
       const userId = subscription.external_reference
       if (!userId) {
         console.log("No external_reference found in subscription")
-        return new Response('Ok', { status: 200 })
+        return new Response(JSON.stringify({ received: true }), { status: 200 })
       }
 
       // Check status of subscription
-      const status = subscription.status // 'authorized', 'paused', 'cancelled'
+      const status = subscription.status // 'authorized', 'paused', 'cancelled', 'pending'
       let planType = 'free'
       let dbStatus = 'trialing'
 
       if (status === 'authorized') {
         dbStatus = 'active'
-        // Determine plan by reason or amount
-        if (subscription.reason.includes('Pro')) planType = 'pro'
-        if (subscription.reason.includes('Full')) planType = 'full'
+        const reason = subscription.reason || ''
+        const amount = subscription.auto_recurring?.transaction_amount || 0
+        if (reason.includes('Full') || amount >= 50000) {
+          planType = 'full'
+        } else {
+          planType = 'pro'
+        }
       } else if (status === 'cancelled') {
         dbStatus = 'canceled'
+        planType = 'free'
       }
 
-      // Update the user's profile in Supabase using the Service Role Key (bypasses RLS)
       const supabaseAdmin = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? ''
       )
 
       const { error } = await supabaseAdmin
@@ -66,7 +85,7 @@ serve(async (req) => {
         .eq('id', userId)
 
       if (error) {
-        console.error("Error updating profile:", error)
+        console.error("Error updating profile in Supabase:", error)
         throw error
       }
       
@@ -78,8 +97,8 @@ serve(async (req) => {
       headers: { 'Content-Type': 'application/json' } 
     })
 
-  } catch (error) {
-    console.error("Webhook error:", error.message)
-    return new Response(JSON.stringify({ error: error.message }), { status: 400 })
+  } catch (error: any) {
+    console.error("Webhook processing error:", error.message)
+    return new Response(JSON.stringify({ error: error.message }), { status: 200 })
   }
 })
