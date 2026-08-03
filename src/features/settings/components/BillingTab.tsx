@@ -12,10 +12,12 @@ import {
 } from '@/components/ui/dialog';
 import { Check, CreditCard, ExternalLink, Loader2, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { useSubscription, type PlanType } from '@/hooks/useSubscription';
+import { useDollarRate } from '@/hooks/useDollarRate';
 import { toast } from 'sonner';
 
 export const BillingTab = () => {
   const { planType, status, trialEnd, isLoading, refetch } = useSubscription();
+  const { rate: dollarRate, calculatePriceArs } = useDollarRate();
   const [isCheckoutLoading, setIsCheckoutLoading] = useState<string | null>(null);
   const [isCancelLoading, setIsCancelLoading] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
@@ -34,7 +36,7 @@ export const BillingTab = () => {
       
       const { supabase } = await import('@/lib/supabase');
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { planId: selectedPlan }
+        body: { planId: selectedPlan, exchangeRate: dollarRate }
       });
 
       if (error) {
@@ -192,9 +194,10 @@ export const BillingTab = () => {
           <CardHeader>
             <CardTitle>Plan Pro</CardTitle>
             <div className="mt-2 flex items-baseline gap-1">
-              <span className="text-3xl font-bold">$39.000</span>
+              <span className="text-3xl font-bold">${calculatePriceArs(39).formatted}</span>
               <span className="text-sm text-muted-foreground"> ARS /mes</span>
             </div>
+            <p className="text-xs text-muted-foreground font-medium">Equivalente a $39 USD / mes</p>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2 text-sm">
@@ -229,9 +232,10 @@ export const BillingTab = () => {
           <CardHeader>
             <CardTitle>Plan Full</CardTitle>
             <div className="mt-2 flex items-baseline gap-1">
-              <span className="text-3xl font-bold">$59.000</span>
+              <span className="text-3xl font-bold">${calculatePriceArs(59).formatted}</span>
               <span className="text-sm text-muted-foreground"> ARS /mes</span>
             </div>
+            <p className="text-xs text-muted-foreground font-medium">Equivalente a $59 USD / mes</p>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2 text-sm">

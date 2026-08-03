@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useDollarRate } from '@/hooks/useDollarRate';
 import { 
   ChevronRight, 
   Star, 
@@ -99,8 +100,7 @@ const stats = [
 const plans = [
   {
     name: "Starter",
-    price: "19",
-    priceArs: "19.000",
+    priceUsd: 19,
     description: "Ideal para profesionales independientes y centros pequeños.",
     features: [
       "Gestión de hasta 100 clientes",
@@ -118,8 +118,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "39",
-    priceArs: "39.000",
+    priceUsd: 39,
     description: "Para centros de estética y consultorios en crecimiento.",
     features: [
       "Gestión de clientes ilimitados",
@@ -137,8 +136,7 @@ const plans = [
   },
   {
     name: "Full",
-    price: "59",
-    priceArs: "59.000",
+    priceUsd: 59,
     description: "La experiencia completa para centros de estética, spas y clínicas.",
     features: [
       "Usuarios ilimitados",
@@ -643,6 +641,8 @@ function Benefits() {
 
 
 function Pricing() {
+  const { calculatePriceArs } = useDollarRate();
+
   return (
     <section id="precios" className="bg-slate-50">
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
@@ -659,59 +659,63 @@ function Pricing() {
         </div>
 
         <div className="mt-14 grid items-start gap-6 lg:grid-cols-3">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={
-                plan.featured
-                  ? "relative rounded-2xl border-2 border-indigo-600 bg-white p-8 shadow-xl shadow-indigo-100 scale-105 z-10"
-                  : "rounded-2xl border border-border bg-white p-8 shadow-sm"
-              }
-            >
-              {plan.featured && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
-                  Más popular
-                </span>
-              )}
-              <h3 className="font-display text-xl font-semibold text-foreground">
-                {plan.name}
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground h-10">{plan.description}</p>
-              <div className="mt-5">
-                <div className="flex items-baseline gap-1">
-                  <span className="font-display text-4xl sm:text-5xl font-semibold text-foreground">
-                    ${plan.priceArs}
+          {plans.map((plan) => {
+            const priceArs = calculatePriceArs(plan.priceUsd).formatted;
+
+            return (
+              <div
+                key={plan.name}
+                className={
+                  plan.featured
+                    ? "relative rounded-2xl border-2 border-indigo-600 bg-white p-8 shadow-xl shadow-indigo-100 scale-105 z-10"
+                    : "rounded-2xl border border-border bg-white p-8 shadow-sm"
+                }
+              >
+                {plan.featured && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
+                    Más popular
                   </span>
-                  <span className="text-sm font-semibold text-foreground">ARS</span>
-                  <span className="text-sm text-muted-foreground">/mes</span>
+                )}
+                <h3 className="font-display text-xl font-semibold text-foreground">
+                  {plan.name}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground h-10">{plan.description}</p>
+                <div className="mt-5">
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-display text-4xl sm:text-5xl font-semibold text-foreground">
+                      ${priceArs}
+                    </span>
+                    <span className="text-sm font-semibold text-foreground">ARS</span>
+                    <span className="text-sm text-muted-foreground">/mes</span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground font-medium">
+                    Equivalente a ${plan.priceUsd} USD / mes
+                  </p>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground font-medium">
-                  Equivalente a ${plan.price} USD / mes
-                </p>
+                <Link to={plan.href} className="block w-full">
+                  <Button
+                    className={`mt-6 w-full h-12 rounded-full font-medium ${plan.featured ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'}`}
+                  >
+                    {plan.cta}
+                  </Button>
+                </Link>
+                <ul className="mt-8 space-y-3">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3 text-sm">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600" aria-hidden="true" />
+                      <span className="text-foreground">{feature}</span>
+                    </li>
+                  ))}
+                  {plan.limitations.map((limit, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-sm text-slate-400">
+                      <div className="h-4 w-4 rounded-full border-2 border-slate-200 flex items-center justify-center shrink-0 mt-0.5" />
+                      <span>{limit}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <Link to={plan.href} className="block w-full">
-                <Button
-                  className={`mt-6 w-full h-12 rounded-full font-medium ${plan.featured ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'}`}
-                >
-                  {plan.cta}
-                </Button>
-              </Link>
-              <ul className="mt-8 space-y-3">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3 text-sm">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600" aria-hidden="true" />
-                    <span className="text-foreground">{feature}</span>
-                  </li>
-                ))}
-                {plan.limitations.map((limit, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-sm text-slate-400">
-                    <div className="h-4 w-4 rounded-full border-2 border-slate-200 flex items-center justify-center shrink-0 mt-0.5" />
-                    <span>{limit}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-10 max-w-2xl mx-auto text-center rounded-xl bg-slate-100 p-4 border border-slate-200">

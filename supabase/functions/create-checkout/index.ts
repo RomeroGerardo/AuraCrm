@@ -6,6 +6,47 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const DEFAULT_FALLBACK_DOLLAR_RATE = 1510;
+
+const PLAN_USD_PRICES: Record<string, { priceUsd: number; name: string }> = {
+  pro: { priceUsd: 39, name: 'Plan Pro - Aura CRM' },
+  full: { priceUsd: 59, name: 'Plan Full - Aura CRM' },
+};
+
+async function getDollarRate(): Promise<number> {
+  try {
+    const res = await fetch('https://dolarapi.com/v1/dolares/oficial', {
+      headers: { Accept: 'application/json' },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const rate = Number(data.venta || data.compra);
+      if (rate && !isNaN(rate) && rate > 0) {
+        return rate;
+      }
+    }
+  } catch (err) {
+    console.warn('DolarAPI fetch failed in create-checkout, trying backup...', err);
+  }
+
+  try {
+    const res = await fetch('https://api.bluelytics.com.ar/v2/latest', {
+      headers: { Accept: 'application/json' },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const rate = Number(data?.oficial?.value_sell || data?.oficial?.value_avg);
+      if (rate && !isNaN(rate) && rate > 0) {
+        return rate;
+      }
+    }
+  } catch (err) {
+    console.warn('Bluelytics fetch failed in create-checkout...', err);
+  }
+
+  return DEFAULT_FALLBACK_DOLLAR_RATE;
+}
+
 serve(async (req) => {
   // Handle CORS
   if (req.method === 'OPTIONS') {
@@ -26,20 +67,23 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
     if (userError || !user) throw new Error(`Unauthorized: ${userError?.message || 'Invalid session'}`)
 
-    const { planId } = await req.json()
+    const { planId, exchangeRate: clientRate } = await req.json()
     
-    // Map plans to ARS amounts (assuming $1 USD = 1000 ARS for this test)
-    let amount = 0
-    let planName = ''
-    if (planId === 'pro') {
-      amount = 39000
-      planName = 'Plan Pro - Aura CRM'
-    } else if (planId === 'full') {
-      amount = 59000
-      planName = 'Plan Full - Aura CRM'
-    } else {
-      throw new Error('Invalid plan ID')
+    const planConfig = PLAN_USD_PRICES[planId];
+    if (!planConfig) {
+      throw new Error('Invalid plan ID');
     }
+
+    // Determine exchange rate: use clientRate if valid or fetch server-side
+    let dollarRate = DEFAULT_FALLBACK_DOLLAR_RATE;
+    if (typeof clientRate === 'number' && clientRate > 500 && clientRate < 10000) {
+      dollarRate = clientRate;
+    } else {
+      dollarRate = await getDollarRate();
+    }
+
+    const amount = Math.round(planConfig.priceUsd * dollarRate);
+    const planName = planConfig.name;
 
     const MP_ACCESS_TOKEN = Deno.env.get('MERCADOPAGO_ACCESS_TOKEN')
     if (!MP_ACCESS_TOKEN) throw new Error('MP_ACCESS_TOKEN not found')
