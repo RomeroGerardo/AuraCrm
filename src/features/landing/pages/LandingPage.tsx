@@ -89,10 +89,10 @@ const benefits = [
 ];
 
 const stats = [
-  { value: "+500", label: "Clínicas y spas activos" },
-  { value: "50k", label: "Citas gestionadas al mes" },
-  { value: "8 h", label: "Ahorradas por semana" },
-  { value: "99.9%", label: "Tiempo de actividad" },
+  { value: "Hasta 8h", label: "Ahorradas por semana" },
+  { value: "100%", label: "Sin papel con firmas digitales" },
+  { value: "5 min", label: "Tiempo de configuración" },
+  { value: "14 días", label: "Prueba gratis, sin tarjeta" },
 ];
 
 
