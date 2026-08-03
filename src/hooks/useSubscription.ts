@@ -10,11 +10,12 @@ export interface SubscriptionData {
   status: SubscriptionStatus;
   trialEnd: string | null;
   isLoading: boolean;
+  refetch: () => Promise<void>;
 }
 
 export function useSubscription(): SubscriptionData {
   const { user } = useAuthStore();
-  const [data, setData] = useState<Omit<SubscriptionData, 'isLoading'>>({
+  const [data, setData] = useState<Omit<SubscriptionData, 'isLoading' | 'refetch'>>({
     planType: 'free',
     status: 'trialing',
     trialEnd: null,
@@ -79,7 +80,28 @@ export function useSubscription(): SubscriptionData {
     };
   }, [user]);
 
-  return { ...data, isLoading };
+  const refetch = async () => {
+    if (!user) return;
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('plan_type, subscription_status, trial_end')
+        .eq('id', user.id)
+        .single();
+
+      if (!error && profile) {
+        setData({
+          planType: profile.plan_type as PlanType,
+          status: profile.subscription_status as SubscriptionStatus,
+          trialEnd: profile.trial_end,
+        });
+      }
+    } catch (err) {
+      console.error("Error refetching subscription:", err);
+    }
+  };
+
+  return { ...data, isLoading, refetch };
 }
 
 // Helper to check access
