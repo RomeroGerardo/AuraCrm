@@ -100,7 +100,8 @@ const plans = [
   {
     name: "Starter",
     price: "19",
-    description: "Ideal para profesionales independientes.",
+    priceArs: "19.000",
+    description: "Ideal para profesionales independientes y centros pequeños.",
     features: [
       "Gestión de hasta 100 clientes",
       "Agenda básica",
@@ -111,14 +112,15 @@ const plans = [
       "Sin firmas digitales",
       "Sin recordatorios por WhatsApp"
     ],
-    cta: "Empezar Básico",
+    cta: "Empezar gratis",
     featured: false,
     href: '/register?plan=starter'
   },
   {
     name: "Pro",
     price: "39",
-    description: "Para equipos pequeños en crecimiento.",
+    priceArs: "39.000",
+    description: "Para centros de estética y consultorios en crecimiento.",
     features: [
       "Gestión de clientes ilimitados",
       "Formularios dinámicos",
@@ -129,14 +131,15 @@ const plans = [
     limitations: [
       "Sin recordatorios por WhatsApp"
     ],
-    cta: "Elegir Pro",
+    cta: "Empezar gratis",
     featured: true,
     href: '/register?plan=pro'
   },
   {
     name: "Full",
     price: "59",
-    description: "La experiencia completa para clínicas.",
+    priceArs: "59.000",
+    description: "La experiencia completa para centros de estética, spas y clínicas.",
     features: [
       "Usuarios ilimitados",
       "Formularios ilimitados",
@@ -146,7 +149,7 @@ const plans = [
       "Soporte prioritario 24/7"
     ],
     limitations: [],
-    cta: "Prueba 14 días gratis",
+    cta: "Empezar gratis",
     featured: false,
     href: '/register?plan=full'
   },
@@ -255,8 +258,8 @@ function DashboardMockup() {
                AL
              </div>
              <div className="overflow-hidden">
-               <p className="text-sm font-medium text-slate-900 truncate">Dra. Ana López</p>
-               <p className="text-[10px] text-slate-500 truncate">ana@clinicavital.com</p>
+               <p className="text-sm font-medium text-slate-900 truncate">Ana López</p>
+               <p className="text-[10px] text-slate-500 truncate">ana@auraestetica.com</p>
              </div>
           </div>
         </div>
@@ -269,8 +272,8 @@ function DashboardMockup() {
            <Menu className="h-5 w-5 text-slate-400" />
            <div className="flex items-center gap-4">
              <div className="text-right hidden sm:block">
-               <p className="text-sm font-semibold text-slate-900">Dra. Ana López</p>
-               <p className="text-xs text-slate-500">Clínica Vital</p>
+               <p className="text-sm font-semibold text-slate-900">Ana López</p>
+               <p className="text-xs text-slate-500">Aura Estética</p>
              </div>
            </div>
         </header>
@@ -435,11 +438,11 @@ function Hero() {
         <div className="text-center lg:text-left">
           <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700 lg:mx-0">
             <span className="h-2 w-2 rounded-full bg-indigo-600" aria-hidden="true" />
-            La plataforma #1 para clínicas y spas
+            La plataforma para centros de estética, spas y clínicas
           </div>
 
           <h1 className="mx-auto max-w-xl font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-balance text-foreground sm:text-5xl md:text-6xl lg:mx-0">
-            Gestiona tu clínica <br className="hidden md:block" />
+            Gestiona tu centro de estética o clínica <br className="hidden md:block" />
             <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">de forma inteligente</span>
           </h1>
 
@@ -468,13 +471,8 @@ function Hero() {
             </Button>
           </div>
 
-          <div className="mt-7 flex flex-col items-center justify-center gap-2 text-sm text-muted-foreground sm:flex-row sm:gap-5 lg:justify-start">
-            <div className="flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
-              ))}
-              <span className="ml-1 font-medium text-foreground">4.9/5</span>
-            </div>
+          <div className="mt-7 flex flex-col items-center justify-center gap-2 text-sm text-muted-foreground sm:flex-row sm:gap-3 lg:justify-start">
+            <span className="font-medium text-foreground">Hecho a medida para centros de estética y clínicas</span>
             <span className="hidden sm:inline" aria-hidden="true">
               •
             </span>
@@ -536,7 +534,7 @@ function Features() {
           Todo en uno
         </span>
         <h2 className="mt-3 font-display text-4xl font-semibold tracking-tight text-balance text-foreground sm:text-5xl">
-          Una plataforma completa para tu clínica
+          Una plataforma completa para tu centro o clínica
         </h2>
         <p className="mt-4 text-lg leading-relaxed text-pretty text-muted-foreground">
           Deja de saltar entre cuadernos, hojas de cálculo y apps distintas. Aura CRM
@@ -679,12 +677,17 @@ function Pricing() {
                 {plan.name}
               </h3>
               <p className="mt-1 text-sm text-muted-foreground h-10">{plan.description}</p>
-              <div className="mt-5 flex items-end gap-1">
-                <span className="font-display text-5xl font-semibold text-foreground">
-                  ${plan.price}
-                </span>
-                <span className="mb-1.5 text-sm font-semibold text-foreground">USD</span>
-                <span className="mb-1.5 text-sm text-muted-foreground">/mes</span>
+              <div className="mt-5">
+                <div className="flex items-baseline gap-1">
+                  <span className="font-display text-4xl sm:text-5xl font-semibold text-foreground">
+                    ${plan.priceArs}
+                  </span>
+                  <span className="text-sm font-semibold text-foreground">ARS</span>
+                  <span className="text-sm text-muted-foreground">/mes</span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground font-medium">
+                  Equivalente a ${plan.price} USD / mes
+                </p>
               </div>
               <Link to={plan.href} className="block w-full">
                 <Button
@@ -713,8 +716,7 @@ function Pricing() {
 
         <div className="mt-10 max-w-2xl mx-auto text-center rounded-xl bg-slate-100 p-4 border border-slate-200">
           <p className="text-sm text-slate-600">
-            * Los precios están expresados en <strong>dólares americanos (USD)</strong>. <br className="sm:hidden" />
-            Al momento de pagar, se cobrará el equivalente en <strong>pesos</strong> según la cotización del día.
+            * Al momento de pagar, se cobrará el equivalente en <strong>pesos</strong> según la cotización del día.
           </p>
         </div>
       </div>
@@ -731,10 +733,10 @@ function CTA() {
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,oklch(1_0_0/0.15),transparent_55%)]"
         />
         <h2 className="relative mx-auto max-w-2xl font-display text-4xl font-semibold tracking-tight text-balance text-white sm:text-5xl">
-          Simplifica la gestión de tu clínica hoy mismo
+          Simplifica la gestión de tu centro o clínica hoy mismo
         </h2>
         <p className="relative mx-auto mt-4 max-w-xl text-lg leading-relaxed text-pretty text-indigo-100">
-          Únete a miles de profesionales que ya ahorran horas de trabajo cada semana.
+          Diseñado a medida para centros de estética, spas y clínicas.
           Prueba Aura CRM gratis durante 14 días.
         </p>
         <div className="relative mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -771,14 +773,14 @@ function SiteFooter() {
             <AuraLogo size="large" />
           </Link>
           <p className="mt-6 max-w-md text-sm leading-relaxed text-muted-foreground">
-            El CRM todo en uno para gestionar tu clínica o centro médico
+            El CRM todo en uno para gestionar tu centro de estética, spa o clínica
             con eficiencia y profesionalismo. Creado por Romero Labs.
           </p>
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 text-sm text-muted-foreground sm:flex-row">
           <p>© {new Date().getFullYear()} Aura CRM (Romero Labs). Todos los derechos reservados.</p>
-          <p>Diseñado para potenciar profesionales de la salud y el bienestar.</p>
+          <p>Diseñado para centros de estética, spas y clínicas.</p>
         </div>
       </div>
     </footer>
